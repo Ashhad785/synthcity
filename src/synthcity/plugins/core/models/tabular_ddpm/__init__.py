@@ -1,7 +1,7 @@
 # stdlib
 from collections.abc import Iterator
 from copy import deepcopy
-from typing import Any, Optional, Sequence
+from typing import Any, Optional, Sequence, Union
 
 # third party
 import numpy as np
