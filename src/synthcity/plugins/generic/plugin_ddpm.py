@@ -223,7 +223,7 @@ class TabDDPMPlugin(Plugin):
         if cond is not None:
             if type(cond) is str:
                 cond = df[cond]
-            cond = pd.Series(cond, index=df.index)
+            # cond = pd.Series(cond, index=df.index)
             self.expecting_conditional = True
 
         # NOTE: cond may also be included in the dataframe
