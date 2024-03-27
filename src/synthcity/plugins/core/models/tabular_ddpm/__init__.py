@@ -82,7 +82,7 @@ class TabDDPM(nn.Module, ValidationMixin):
             targ.detach().mul_(rate).add_(src.detach(), alpha=1 - rate)
 
     def fit(
-        self, X: pd.DataFrame, cond: Optional[pd.Series] = None, **kwargs: Any
+        self, X: pd.DataFrame, cond: Optional[Union[pd.DataFrame, pd.Series, np.ndarray, list]] = None, **kwargs: Any
     ) -> "TabDDPM":
 
         X = self._set_val_data(X)
