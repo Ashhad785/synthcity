@@ -4,7 +4,7 @@ Reference: Kotelnikov, Akim et al. “TabDDPM: Modelling Tabular Data with Diffu
 
 # stdlib
 from pathlib import Path
-from typing import Any, List, Optional, Sequence
+from typing import Any, List, Optional, Sequence, Union
 
 # third party
 import numpy as np
