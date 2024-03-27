@@ -114,7 +114,8 @@ class TabDDPM(nn.Module, ValidationMixin):
             torch.tensor([torch.nan] * len(X), dtype=torch.float32, device=self.device)
             if cond is None
             else torch.tensor(
-                cond.values,
+                # cond.values,
+                cond,
                 dtype=torch.long if self.is_classification else torch.float32,
                 device=self.device,
             ),
