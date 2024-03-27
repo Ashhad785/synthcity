@@ -90,8 +90,8 @@ class TabDDPM(nn.Module, ValidationMixin):
         self.on_fit_begin()
 
         if self.is_classification and cond is not None:
-            if np.ndim(cond) != 1:
-                raise ValueError("cond must be a 1D array")
+            # if np.ndim(cond) != 1:
+                # raise ValueError("cond must be a 1D array")
             self.n_classes = cond.nunique()
         else:
             self.n_classes = 0
