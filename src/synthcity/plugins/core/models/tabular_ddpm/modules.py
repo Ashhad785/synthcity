@@ -70,8 +70,8 @@ class SinusoidalEmbedding(nn.Module):
 
         # Assign sinusoidal embeddings based on the order of time-to-event
         for j in range(self.embedding_dim // 2):
-            embeddings[:, 2 * j] = torch.sin(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
-            embeddings[:, 2 * j + 1] = torch.cos(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
+            embeddings[:, 2 * j] = torch.sin(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
+            embeddings[:, 2 * j + 1] = torch.cos(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
 
         return embeddings
 
@@ -118,8 +118,8 @@ class DiffusionModel(nn.Module):
 
         if conditional:
             if self.num_classes > 0:
-                self.label_emb = nn.Embedding(self.num_classes, dim_emb)
-                # self.label_emb= SinusoidalEmbedding()
+                # self.label_emb = nn.Embedding(self.num_classes, dim_emb)
+                self.label_emb= SinusoidalEmbedding(embedding_dim=128)
             elif self.num_classes == 0:  # regression
                 self.label_emb = nn.Linear(1, dim_emb)
 
