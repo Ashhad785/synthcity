@@ -118,8 +118,8 @@ class DiffusionModel(nn.Module):
 
         if conditional:
             if self.num_classes > 0:
-                # self.label_emb = nn.Embedding(self.num_classes, dim_emb)
-                self.label_emb= SinusoidalEmbedding()
+                self.label_emb = nn.Embedding(self.num_classes, dim_emb)
+                # self.label_emb= SinusoidalEmbedding()
             elif self.num_classes == 0:  # regression
                 self.label_emb = nn.Linear(1, dim_emb)
 
