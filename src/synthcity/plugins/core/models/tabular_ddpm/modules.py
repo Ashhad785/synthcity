@@ -60,7 +60,7 @@ class TimeStepEmbedding(nn.Module):
 
 class SinusoidalEmbedding(nn.Module):
     
-    def __init__(self, embedding_dim=4):
+    def __init__(self, embedding_dim=128):
         super(SinusoidalEmbedding, self).__init__()
         self.embedding_dim = embedding_dim
         
@@ -84,9 +84,9 @@ class SinusoidalEmbedding(nn.Module):
         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
 
         # Concatenate event indicators to sinusoidal embeddings
-        value_embeddings = torch.cat((time_embeddings, event_indicators), dim=1)
+        # value_embeddings = torch.cat((time_embeddings, event_indicators), dim=1)
 
-        return value_embeddings
+        return time_embeddings
 
 
 
