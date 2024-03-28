@@ -137,6 +137,7 @@ class DiffusionModel(nn.Module):
 
     def forward(self, x: Tensor, t: Tensor, y: Optional[Tensor] = None) -> Tensor:
         emb = self.time_emb(t)
+        print(emb.size())
         if self.has_label:
             if y is None:
                 raise ValueError("y must be provided if conditional is True")
@@ -145,6 +146,7 @@ class DiffusionModel(nn.Module):
             else:
                 y = y.squeeze().long()
             emb += self.emb_nonlin(self.label_emb(y))
+            print(emb.size())
             # emb += self.label_emb(y)
         x = self.proj(x) + emb
         return self.model(x)
