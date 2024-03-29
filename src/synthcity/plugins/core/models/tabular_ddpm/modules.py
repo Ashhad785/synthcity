@@ -251,7 +251,8 @@ class DiffusionModel(nn.Module):
                 raise ValueError("y must be provided if conditional is True")
             z = self.emb_nonlin(self.label_emb(y))
             print("Size of z:", z.size())
-            emb = torch.cat((emb, z), dim=-1)
+            # emb = torch.cat((emb, z), dim=-1)
+            emb += self.emb_nonlin(self.label_emb(y))
 
         x = self.proj(x) + emb
         return self.model(x)
