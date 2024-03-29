@@ -151,6 +151,7 @@ class DiffusionModel(nn.Module):
                 # y = y.squeeze().long()
                 # y=y.long()
             # print(y.size())
+            print("Size of y here is :", y.size())
             z=self.label_emb(y)
             print("Size of z:", z.size())
             emb += self.emb_nonlin(self.label_emb(y))
