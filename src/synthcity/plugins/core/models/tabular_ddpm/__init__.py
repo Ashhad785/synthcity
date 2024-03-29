@@ -158,7 +158,9 @@ class TabDDPM(nn.Module, ValidationMixin):
             self.train()
             self.on_epoch_begin()
 
-            for x, y in self.dataloader:
+            for zip(x, y) in self.dataloader:
+                print(x.shape())
+                print(y.shape())
                 self.optimizer.zero_grad()
                 args = (x,) if cond is None else (x, y)
                 loss_multi, loss_gauss = self.diffusion.mixed_loss(*args)
