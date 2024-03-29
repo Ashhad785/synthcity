@@ -58,6 +58,36 @@ class TimeStepEmbedding(nn.Module):
         emb = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
         return self.fc(emb)
 
+# class SinusoidalEmbedding(nn.Module):
+    
+#     def __init__(self, embedding_dim=128):
+#         super(SinusoidalEmbedding, self).__init__()
+#         self.embedding_dim = embedding_dim
+        
+#     def _generate_sinusoidal_embeddings(self, time_to_event):
+#         batch_size = time_to_event.size(0)
+#         embeddings = torch.zeros(batch_size, self.embedding_dim)
+
+#         # Assign sinusoidal embeddings based on the order of time-to-event
+#         for j in range(self.embedding_dim // 2):
+#             embeddings[:, 2 * j] = torch.sin(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
+#             embeddings[:, 2 * j + 1] = torch.cos(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
+
+#         return embeddings
+
+#     def forward(self, input_data):
+#         batch_size = input_data.size(0)
+#         time_to_event = input_data[:, 0].unsqueeze(1)  # Extract time-to-event
+#         event_indicators = input_data[:, 1].unsqueeze(1)  # Extract event indicators
+
+#         # Create sinusoidal embeddings for time-to-event
+#         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
+
+#         # Concatenate event indicators to sinusoidal embeddings
+#         # value_embeddings = torch.cat((time_embeddings, event_indicators), dim=1)
+
+#         return time_embeddings
+
 class SinusoidalEmbedding(nn.Module):
     
     def __init__(self, embedding_dim=128):
@@ -70,23 +100,23 @@ class SinusoidalEmbedding(nn.Module):
 
         # Assign sinusoidal embeddings based on the order of time-to-event
         for j in range(self.embedding_dim // 2):
-            embeddings[:, 2 * j] = torch.sin(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
-            embeddings[:, 2 * j + 1] = torch.cos(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
+            embeddings[:, 2 * j] = torch.sin(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
+            embeddings[:, 2 * j + 1] = torch.cos(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
 
         return embeddings
 
     def forward(self, input_data):
         batch_size = input_data.size(0)
-        time_to_event = input_data[:, 0].unsqueeze(1)  # Extract time-to-event
-        event_indicators = input_data[:, 1].unsqueeze(1)  # Extract event indicators
+        time_to_event = input_data[:, 1]  # Extract time-to-event
+        event_indicators = input_data[:, 0].unsqueeze(1)  # Extract event indicators
 
         # Create sinusoidal embeddings for time-to-event
         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
 
         # Concatenate event indicators to sinusoidal embeddings
-        # value_embeddings = torch.cat((time_embeddings, event_indicators), dim=1)
+        value_embeddings = torch.cat((event_indicators, time_embeddings), dim=1)
 
-        return time_embeddings
+        return value_embeddings
 
 
 
