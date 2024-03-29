@@ -147,12 +147,12 @@ class DiffusionModel(nn.Module):
                 raise ValueError("y must be provided if conditional is True")
             if self.num_classes == 0:
                 y = y.reshape(-1, 1).float()
-            else:
+            # else:
                 # y = y.squeeze().long()
-                y=y.long()
+                # y=y.long()
             # print(y.size())
             z=self.label_emb(y)
-            # print(z.size())
+            print("Size of z:", z.size())
             emb += self.emb_nonlin(self.label_emb(y))
             # print(emb.size())
             # emb += self.label_emb(y)
