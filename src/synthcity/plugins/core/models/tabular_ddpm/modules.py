@@ -145,8 +145,10 @@ class DiffusionModel(nn.Module):
                 y = y.reshape(-1, 1).float()
             else:
                 y = y.squeeze().long()
+            z=self.label_emb(y)
+            print(z.size())
             emb += self.emb_nonlin(self.label_emb(y))
-            print(emb.size())
+            # print(emb.size())
             # emb += self.label_emb(y)
         x = self.proj(x) + emb
         return self.model(x)
