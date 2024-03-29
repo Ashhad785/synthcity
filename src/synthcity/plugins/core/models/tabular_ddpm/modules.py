@@ -141,9 +141,10 @@ class DiffusionModel(nn.Module):
         print("Size of t:", t.size())
         if y is not None:
             print("Size of y:", y.size())
+           
+        if self.has_label:
             z=self.label_emb(y)
             print("Size of z:", z.size())
-        if self.has_label:
             if y is None:
                 raise ValueError("y must be provided if conditional is True")
             if self.num_classes == 0:
