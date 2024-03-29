@@ -144,7 +144,7 @@ class DiffusionModel(nn.Module):
            
         if self.has_label:
             try:
-                z=self.label_emb(y)
+                z=self.emb_nonlin(self.label_emb(y))
                 print("Size of z:", z.size())
             except:
                 
