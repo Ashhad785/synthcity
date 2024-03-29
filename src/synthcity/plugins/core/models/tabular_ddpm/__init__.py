@@ -158,7 +158,7 @@ class TabDDPM(nn.Module, ValidationMixin):
             self.train()
             self.on_epoch_begin()
 
-            for zip(x, y) in self.dataloader:
+            for x, y in self.dataloader:
                 print(x.shape())
                 print(y.shape())
                 self.optimizer.zero_grad()
