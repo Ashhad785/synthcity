@@ -120,6 +120,81 @@ class SinusoidalEmbedding(nn.Module):
 
 
 
+# class DiffusionModel(nn.Module):
+#     def __init__(
+#         self,
+#         dim_in: int,
+#         dim_emb: int = 128,
+#         *,
+#         model_type: str = "mlp",
+#         model_params: dict = {},
+#         conditional: bool = False,
+#         num_classes: int = 0,
+#         emb_nonlin: Union[str, nn.Module] = "silu",
+#         max_time_period: int = 10000,
+#     ) -> None:
+#         super().__init__()
+#         self.dim_t = dim_emb
+#         self.num_classes = num_classes
+#         self.has_label = conditional
+
+#         if isinstance(emb_nonlin, str):
+#             self.emb_nonlin = get_nonlin(emb_nonlin)
+#         else:
+#             self.emb_nonlin = emb_nonlin
+
+#         self.proj = nn.Linear(dim_in, dim_emb)
+#         self.time_emb = TimeStepEmbedding(dim_emb, max_time_period)
+
+#         if conditional:
+#             if self.num_classes > 0:
+#                 # self.label_emb = nn.Embedding(self.num_classes, dim_emb)
+#                 self.label_emb= SinusoidalEmbedding(embedding_dim=128)
+#             elif self.num_classes == 0:  # regression
+#                 self.label_emb = nn.Linear(1, dim_emb)
+
+#         if not model_params:
+#             model_params = {}  # avoid changing the default dict
+
+#         if model_type == "mlp":
+#             if not model_params:
+#                 model_params = dict(n_units_hidden=256, n_layers_hidden=3, dropout=0.0)
+#             model_params.update(n_units_in=dim_emb, n_units_out=dim_in)
+#         elif model_type == "tabnet":
+#             model_params.update(input_dim=dim_emb, output_dim=dim_in)
+
+#         self.model = get_model(model_type, model_params)
+
+#     def forward(self, x: Tensor, t: Tensor, y: Optional[Tensor] = None) -> Tensor:
+#         emb = self.time_emb(t)
+#         print("Size of x:", x.size())
+#         print("Size of t:", t.size())
+#         if y is not None:
+#             print("Size of y:", y.size())
+           
+#         if self.has_label:
+#             try:
+#                 z=self.emb_nonlin(self.label_emb(y))
+#                 print("Size of z:", z.size())
+#             except:
+                
+#                 if y is None:
+#                     raise ValueError("y must be provided if conditional is True")
+#                 if self.num_classes == 0:
+#                     y = y.reshape(-1, 1).float()
+#                 # else:
+#                     # y = y.squeeze().long()
+#                     # y=y.long()
+#                 # print(y.size())
+#                 # print("Size of y here is :", y.size())
+                
+                
+#                 # emb += self.emb_nonlin(self.label_emb(y))
+#                 # print(emb.size())
+#                 emb += z
+#         x = self.proj(x) + emb
+#         return self.model(x)
+
 class DiffusionModel(nn.Module):
     def __init__(
         self,
@@ -148,10 +223,9 @@ class DiffusionModel(nn.Module):
 
         if conditional:
             if self.num_classes > 0:
-                # self.label_emb = nn.Embedding(self.num_classes, dim_emb)
-                self.label_emb= SinusoidalEmbedding(embedding_dim=128)
+                self.label_emb = SinusoidalEmbedding(embedding_dim=dim_emb + 1)
             elif self.num_classes == 0:  # regression
-                self.label_emb = nn.Linear(1, dim_emb)
+                self.label_emb = nn.Linear(2, dim_emb)
 
         if not model_params:
             model_params = {}  # avoid changing the default dict
@@ -171,26 +245,13 @@ class DiffusionModel(nn.Module):
         print("Size of t:", t.size())
         if y is not None:
             print("Size of y:", y.size())
-           
+
         if self.has_label:
-            try:
-                z=self.emb_nonlin(self.label_emb(y))
-                print("Size of z:", z.size())
-            except:
-                
-                if y is None:
-                    raise ValueError("y must be provided if conditional is True")
-                if self.num_classes == 0:
-                    y = y.reshape(-1, 1).float()
-                # else:
-                    # y = y.squeeze().long()
-                    # y=y.long()
-                # print(y.size())
-                # print("Size of y here is :", y.size())
-                
-                
-                # emb += self.emb_nonlin(self.label_emb(y))
-                # print(emb.size())
-                emb += z
+            if y is None:
+                raise ValueError("y must be provided if conditional is True")
+            z = self.emb_nonlin(self.label_emb(y))
+            print("Size of z:", z.size())
+            emb = torch.cat((emb, z), dim=-1)
+
         x = self.proj(x) + emb
         return self.model(x)
