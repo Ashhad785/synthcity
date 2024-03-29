@@ -137,6 +137,7 @@ class DiffusionModel(nn.Module):
 
     def forward(self, x: Tensor, t: Tensor, y: Optional[Tensor] = None) -> Tensor:
         emb = self.time_emb(t)
+        print(y.size())
         # print(emb.size())
         if self.has_label:
             if y is None:
