@@ -164,7 +164,7 @@ class TabDDPM(nn.Module, ValidationMixin):
                 self.optimizer.zero_grad()
                 args = (x,) if cond is None else (x, y)
                 # print(args.shape())
-                print(f"Shape of args: {[arg.size() for arg in args]}")
+                # print(f"Shape of args: {[arg.size() for arg in args]}")
                 loss_multi, loss_gauss = self.diffusion.mixed_loss(*args)
                 loss = loss_multi + loss_gauss
                 loss.backward()
