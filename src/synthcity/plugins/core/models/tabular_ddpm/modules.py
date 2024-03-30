@@ -335,6 +335,8 @@ class DiffusionModel(nn.Module):
         if self.has_label:
             if y is None:
                 raise ValueError("y must be provided if conditional is True")
+            z = self.emb_nonlin(self.label_emb(y))
+            print(z.size())
             emb += self.emb_nonlin(self.label_emb(y))
         x = self.proj(x) + emb
         return self.model(x)
