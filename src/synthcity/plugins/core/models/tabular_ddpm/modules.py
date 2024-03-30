@@ -125,7 +125,7 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         self.max_time_period = max_time_period
         
 
-        self.event_emb = nn.Embedding(num_embeddings=2, dim_emb // 2)
+        self.event_emb = nn.Embedding(dim_emb // 2)
 
     def forward(self, inputs: Tensor) -> Tensor:
         time_to_event, event_indicator = inputs[:, 0], inputs[:, 1]
