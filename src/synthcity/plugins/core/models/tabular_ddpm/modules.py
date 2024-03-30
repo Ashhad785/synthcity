@@ -58,65 +58,6 @@ class TimeStepEmbedding(nn.Module):
         emb = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
         return self.fc(emb)
 
-# class SinusoidalEmbedding(nn.Module):
-    
-#     def __init__(self, embedding_dim=128):
-#         super(SinusoidalEmbedding, self).__init__()
-#         self.embedding_dim = embedding_dim
-        
-#     def _generate_sinusoidal_embeddings(self, time_to_event):
-#         batch_size = time_to_event.size(0)
-#         embeddings = torch.zeros(batch_size, self.embedding_dim)
-
-#         # Assign sinusoidal embeddings based on the order of time-to-event
-#         for j in range(self.embedding_dim // 2):
-#             embeddings[:, 2 * j] = torch.sin(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
-#             embeddings[:, 2 * j + 1] = torch.cos(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
-
-#         return embeddings
-
-#     def forward(self, input_data):
-#         batch_size = input_data.size(0)
-#         time_to_event = input_data[:, 0].unsqueeze(1)  # Extract time-to-event
-#         event_indicators = input_data[:, 1].unsqueeze(1)  # Extract event indicators
-
-#         # Create sinusoidal embeddings for time-to-event
-#         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
-
-#         # Concatenate event indicators to sinusoidal embeddings
-#         # value_embeddings = torch.cat((time_embeddings, event_indicators), dim=1)
-
-#         return time_embeddings
-
-# class SinusoidalEmbedding(nn.Module):
-    
-#     def __init__(self, embedding_dim=128):
-#         super(SinusoidalEmbedding, self).__init__()
-#         self.embedding_dim = embedding_dim
-        
-#     def _generate_sinusoidal_embeddings(self, time_to_event):
-#         batch_size = time_to_event.size(0)
-#         embeddings = torch.zeros(batch_size, self.embedding_dim)
-
-#         # Assign sinusoidal embeddings based on the order of time-to-event
-#         for j in range(self.embedding_dim // 2):
-#             embeddings[:, 2 * j] = torch.sin(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
-#             embeddings[:, 2 * j + 1] = torch.cos(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
-
-#         return embeddings
-
-#     def forward(self, input_data):
-#         batch_size = input_data.size(0)
-#         time_to_event = input_data[:, 1]  # Extract time-to-event
-#         event_indicators = input_data[:, 0].unsqueeze(1)  # Extract event indicators
-
-#         # Create sinusoidal embeddings for time-to-event
-#         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
-
-#         # Concatenate event indicators to sinusoidal embeddings
-#         value_embeddings = torch.cat((event_indicators, time_embeddings), dim=1)
-
-#         return value_embeddings
 
 class SinusoidalAndEmbeddingLayer(nn.Module):
     def __init__(self, dim_emb: int, max_time_period: int):
@@ -145,10 +86,65 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         sinusoidal_emb = sinusoidal_emb[sorted_indices.argsort()]
 
         event_emb = self.event_emb(event_indicator.long())
-        print("sin emb size:",sinusoidal_emb.size())
-        print("event emb size:",event_emb.size())
+        # print("sin emb size:",sinusoidal_emb.size())
+        # print("event emb size:",event_emb.size())
 
         return torch.cat([sinusoidal_emb, event_emb], dim=-1)
+
+class DiffusionModel(nn.Module):
+    def __init__(
+        self,
+        dim_in: int,
+        dim_emb: int = 128,
+        *,
+        model_type: str = "mlp",
+        model_params: dict = {},
+        conditional: bool = False,
+        num_classes: int = 0,
+        emb_nonlin: Union[str, nn.Module] = "silu",
+        max_time_period: int = 10000,
+    ) -> None:
+        super().__init__()
+        self.dim_t = dim_emb
+        self.num_classes = num_classes
+        self.has_label = conditional
+
+        if isinstance(emb_nonlin, str):
+            self.emb_nonlin = get_nonlin(emb_nonlin)
+        else:
+            self.emb_nonlin = emb_nonlin
+
+        self.proj = nn.Linear(dim_in, dim_emb)
+        self.time_emb = TimeStepEmbedding(dim_emb, max_time_period)
+
+        if conditional:
+            self.label_emb = SinusoidalAndEmbeddingLayer(dim_emb, max_time_period)
+
+        if not model_params:
+            model_params = {}  # avoid changing the default dict
+
+        if model_type == "mlp":
+            if not model_params:
+                model_params = dict(n_units_hidden=256, n_layers_hidden=3, dropout=0.0)
+            model_params.update(n_units_in=dim_emb, n_units_out=dim_in)
+        elif model_type == "tabnet":
+            model_params.update(input_dim=dim_emb, output_dim=dim_in)
+
+        self.model = get_model(model_type, model_params)
+
+    def forward(self, x: torch.Tensor, t: torch.Tensor, y: Optional[torch.Tensor] = None) -> torch.Tensor:
+        emb = self.time_emb(t)
+        if self.has_label:
+            if y is None:
+                raise ValueError("y must be provided if conditional is True")
+            # z = self.emb_nonlin(self.label_emb(y))
+            # print(z.size())
+            emb += self.emb_nonlin(self.label_emb(y))
+        x = self.proj(x) + emb
+        return self.model(x)
+
+
+
 
 # class DiffusionModel(nn.Module):
 #     def __init__(
@@ -291,54 +287,63 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
 #         x = self.proj(x) + emb
 #         return self.model(x)
 
-class DiffusionModel(nn.Module):
-    def __init__(
-        self,
-        dim_in: int,
-        dim_emb: int = 128,
-        *,
-        model_type: str = "mlp",
-        model_params: dict = {},
-        conditional: bool = False,
-        num_classes: int = 0,
-        emb_nonlin: Union[str, nn.Module] = "silu",
-        max_time_period: int = 10000,
-    ) -> None:
-        super().__init__()
-        self.dim_t = dim_emb
-        self.num_classes = num_classes
-        self.has_label = conditional
 
-        if isinstance(emb_nonlin, str):
-            self.emb_nonlin = get_nonlin(emb_nonlin)
-        else:
-            self.emb_nonlin = emb_nonlin
+# class SinusoidalEmbedding(nn.Module):
+    
+#     def __init__(self, embedding_dim=128):
+#         super(SinusoidalEmbedding, self).__init__()
+#         self.embedding_dim = embedding_dim
+        
+#     def _generate_sinusoidal_embeddings(self, time_to_event):
+#         batch_size = time_to_event.size(0)
+#         embeddings = torch.zeros(batch_size, self.embedding_dim)
 
-        self.proj = nn.Linear(dim_in, dim_emb)
-        self.time_emb = TimeStepEmbedding(dim_emb, max_time_period)
+#         # Assign sinusoidal embeddings based on the order of time-to-event
+#         for j in range(self.embedding_dim // 2):
+#             embeddings[:, 2 * j] = torch.sin(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
+#             embeddings[:, 2 * j + 1] = torch.cos(time_to_event.squeeze(-1) / (10000 ** (2 * j / self.embedding_dim)))
 
-        if conditional:
-            self.label_emb = SinusoidalAndEmbeddingLayer(dim_emb, max_time_period)
+#         return embeddings
 
-        if not model_params:
-            model_params = {}  # avoid changing the default dict
+#     def forward(self, input_data):
+#         batch_size = input_data.size(0)
+#         time_to_event = input_data[:, 0].unsqueeze(1)  # Extract time-to-event
+#         event_indicators = input_data[:, 1].unsqueeze(1)  # Extract event indicators
 
-        if model_type == "mlp":
-            if not model_params:
-                model_params = dict(n_units_hidden=256, n_layers_hidden=3, dropout=0.0)
-            model_params.update(n_units_in=dim_emb, n_units_out=dim_in)
-        elif model_type == "tabnet":
-            model_params.update(input_dim=dim_emb, output_dim=dim_in)
+#         # Create sinusoidal embeddings for time-to-event
+#         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
 
-        self.model = get_model(model_type, model_params)
+#         # Concatenate event indicators to sinusoidal embeddings
+#         # value_embeddings = torch.cat((time_embeddings, event_indicators), dim=1)
 
-    def forward(self, x: torch.Tensor, t: torch.Tensor, y: Optional[torch.Tensor] = None) -> torch.Tensor:
-        emb = self.time_emb(t)
-        if self.has_label:
-            if y is None:
-                raise ValueError("y must be provided if conditional is True")
-            # z = self.emb_nonlin(self.label_emb(y))
-            # print(z.size())
-            emb += self.emb_nonlin(self.label_emb(y))
-        x = self.proj(x) + emb
-        return self.model(x)
+#         return time_embeddings
+
+# class SinusoidalEmbedding(nn.Module):
+    
+#     def __init__(self, embedding_dim=128):
+#         super(SinusoidalEmbedding, self).__init__()
+#         self.embedding_dim = embedding_dim
+        
+#     def _generate_sinusoidal_embeddings(self, time_to_event):
+#         batch_size = time_to_event.size(0)
+#         embeddings = torch.zeros(batch_size, self.embedding_dim)
+
+#         # Assign sinusoidal embeddings based on the order of time-to-event
+#         for j in range(self.embedding_dim // 2):
+#             embeddings[:, 2 * j] = torch.sin(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
+#             embeddings[:, 2 * j + 1] = torch.cos(time_to_event / (10000 ** (2 * j / self.embedding_dim)))
+
+#         return embeddings
+
+#     def forward(self, input_data):
+#         batch_size = input_data.size(0)
+#         time_to_event = input_data[:, 1]  # Extract time-to-event
+#         event_indicators = input_data[:, 0].unsqueeze(1)  # Extract event indicators
+
+#         # Create sinusoidal embeddings for time-to-event
+#         time_embeddings = self._generate_sinusoidal_embeddings(time_to_event)
+
+#         # Concatenate event indicators to sinusoidal embeddings
+#         value_embeddings = torch.cat((event_indicators, time_embeddings), dim=1)
+
+#         return value_embeddings
