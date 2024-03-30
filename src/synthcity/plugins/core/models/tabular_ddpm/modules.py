@@ -245,6 +245,8 @@ class DiffusionModel(nn.Module):
         print("Size of t:", t.size())
         if y is not None:
             print("Size of y:", y.size())
+            print("First 5 examples of y:")
+            print(y[:5])
 
         if self.has_label:
             if y is None:
@@ -252,7 +254,7 @@ class DiffusionModel(nn.Module):
             z = self.emb_nonlin(self.label_emb(y))
             print(y[:,0:5])
             print("Size of z:", z.size())
-            print(z[:,0:5])
+            print(z[:5])
             # emb = torch.cat((emb, z), dim=-1)
             emb += self.emb_nonlin(self.label_emb(y))
 
