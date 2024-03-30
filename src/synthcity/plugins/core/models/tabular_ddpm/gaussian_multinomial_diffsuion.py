@@ -932,57 +932,57 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         sample = torch.cat([z_norm, z_cat], dim=1).cpu()
         return sample
 
-    # def sample_all(
-    #     self,
-    #     num_samples: int,
-    #     cond: Any = None,
-    #     max_batch_size: int = 2000,
-    #     ddim: bool = False,
-    # ) -> Tensor:
-    #     if ddim:
-    #         info("Sample using DDIM.")
-    #         sample_fn = self.sample_ddim
-    #     else:
-    #         sample_fn = self.sample
-
-    #     indices = [*range(0, num_samples, max_batch_size), num_samples]
-    #     all_samples = []
-
-    #     for i, b in enumerate(np.diff(indices)):
-    #         c = None if cond is None else cond[indices[i] : indices[i + 1]]
-    #         sample = sample_fn(b, c)
-    #         if torch.any(sample.isnan()).item():
-    #             raise ValueError("found NaNs in sample")
-    #         all_samples.append(sample)
-
-    #     return torch.cat(all_samples, dim=0)
-
-def sample_all(
-    self,
-    num_samples: int,
-    cond: Any = None,
-    max_batch_size: int = 2000,
-    ddim: bool = False,
-) -> Tensor:
-    if ddim:
-        info("Sample using DDIM.")
-        sample_fn = self.sample_ddim
-    else:
-        sample_fn = self.sample
-
-    indices = [*range(0, num_samples, max_batch_size), num_samples]
-    all_samples = []
-    for i, b in enumerate(np.diff(indices)):
-        if cond is not None:
-            cond_batch_shape = cond.shape[:1]  # Get the batch dimension shape
-            cond_remaining_shape = cond.shape[1:]  # Get the remaining dimensions shape
-            c = cond[indices[i] : indices[i + 1]].view(-1, *cond_remaining_shape)
+    def sample_all(
+        self,
+        num_samples: int,
+        cond: Any = None,
+        max_batch_size: int = 2000,
+        ddim: bool = False,
+    ) -> Tensor:
+        if ddim:
+            info("Sample using DDIM.")
+            sample_fn = self.sample_ddim
         else:
-            c = None
+            sample_fn = self.sample
 
-        sample = sample_fn(b, c)
-        if torch.any(sample.isnan()).item():
-            raise ValueError("found NaNs in sample")
-        all_samples.append(sample)
+        indices = [*range(0, num_samples, max_batch_size), num_samples]
+        all_samples = []
 
-    return torch.cat(all_samples, dim=0)
+        for i, b in enumerate(np.diff(indices)):
+            c = None if cond is None else cond[indices[i] : indices[i + 1]]
+            sample = sample_fn(b, c)
+            if torch.any(sample.isnan()).item():
+                raise ValueError("found NaNs in sample")
+            all_samples.append(sample)
+
+        return torch.cat(all_samples, dim=0)
+
+# def sample_all(
+#     self,
+#     num_samples: int,
+#     cond: Any = None,
+#     max_batch_size: int = 2000,
+#     ddim: bool = False,
+# ) -> Tensor:
+#     if ddim:
+#         info("Sample using DDIM.")
+#         sample_fn = self.sample_ddim
+#     else:
+#         sample_fn = self.sample
+
+#     indices = [*range(0, num_samples, max_batch_size), num_samples]
+#     all_samples = []
+#     for i, b in enumerate(np.diff(indices)):
+#         if cond is not None:
+#             cond_batch_shape = cond.shape[:1]  # Get the batch dimension shape
+#             cond_remaining_shape = cond.shape[1:]  # Get the remaining dimensions shape
+#             c = cond[indices[i] : indices[i + 1]].view(-1, *cond_remaining_shape)
+#         else:
+#             c = None
+
+#         sample = sample_fn(b, c)
+#         if torch.any(sample.isnan()).item():
+#             raise ValueError("found NaNs in sample")
+#         all_samples.append(sample)
+
+#     return torch.cat(all_samples, dim=0)
