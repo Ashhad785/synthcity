@@ -119,13 +119,13 @@ class TimeStepEmbedding(nn.Module):
 #         return value_embeddings
 
 class SinusoidalAndEmbeddingLayer(nn.Module):
-    def __init__(self, dim_emb: int, max_time_period: int, num_classes: int):
+    def __init__(self, dim_emb: int, max_time_period: int):
         super().__init__()
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
-        self.num_classes = num_classes
+        
 
-        self.event_emb = nn.Embedding(num_classes, dim_emb // 2)
+        self.event_emb = nn.Embedding(num_embeddings=2, dim_emb // 2)
 
     def forward(self, inputs: Tensor) -> Tensor:
         time_to_event, event_indicator = inputs[:, 0], inputs[:, 1]
@@ -316,7 +316,7 @@ class DiffusionModel(nn.Module):
         self.time_emb = TimeStepEmbedding(dim_emb, max_time_period)
 
         if conditional:
-            self.label_emb = SinusoidalAndEmbeddingLayer(dim_emb, max_time_period, num_classes)
+            self.label_emb = SinusoidalAndEmbeddingLayer(dim_emb, max_time_period)
 
         if not model_params:
             model_params = {}  # avoid changing the default dict
