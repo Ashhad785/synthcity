@@ -145,6 +145,8 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         sinusoidal_emb = sinusoidal_emb[sorted_indices.argsort()]
 
         event_emb = self.event_emb(event_indicator.long())
+        print("sin emb size:",sinusoidal_emb.size())
+        print("event emb size:",event_emb.size())
 
         return torch.cat([sinusoidal_emb, event_emb], dim=-1)
 
@@ -335,8 +337,8 @@ class DiffusionModel(nn.Module):
         if self.has_label:
             if y is None:
                 raise ValueError("y must be provided if conditional is True")
-            z = self.emb_nonlin(self.label_emb(y))
-            print(z.size())
+            # z = self.emb_nonlin(self.label_emb(y))
+            # print(z.size())
             emb += self.emb_nonlin(self.label_emb(y))
         x = self.proj(x) + emb
         return self.model(x)
