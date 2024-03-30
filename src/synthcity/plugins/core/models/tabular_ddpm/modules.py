@@ -135,7 +135,7 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         time_to_event = time_to_event[sorted_indices]
 
         # Calculate sinusoidal embeddings
-        dim = self.dim_emb // 2
+        dim = self.dim_emb // 4
         max_period = self.max_time_period
         freqs = torch.exp(-math.log(max_period) / (dim - 1) * torch.arange(dim, dtype=torch.float32, device=time_to_event.device))
         args = time_to_event[:, None] * freqs[None, :]
