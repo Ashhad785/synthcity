@@ -88,8 +88,8 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         # sinusoidal_emb = sinusoidal_emb[sorted_indices.argsort()]
         emb= self.time_to_event_emb(time_to_event)
         event_emb = self.event_emb(event_indicator.long())
-        # print("sin emb size:",sinusoidal_emb.size())
-        # print("event emb size:",event_emb.size())
+        print("sin emb size:",emb.size())
+        print("event emb size:",event_emb.size())
         emb += event_emb
         return emb
 
