@@ -1,5 +1,5 @@
 # stdlib
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple,Union
 
 # third party
 import numpy as np
@@ -18,7 +18,7 @@ import synthcity.logger as log
 from synthcity.metrics.weighted_metrics import WeightedMetrics
 from synthcity.utils.constants import DEVICE
 from synthcity.utils.reproducibility import clear_cache, enable_reproducible_results
-
+from synthcity.plugins.core.models.factory import get_nonlin
 # synthcity relative
 from .mlp import MLP
 
