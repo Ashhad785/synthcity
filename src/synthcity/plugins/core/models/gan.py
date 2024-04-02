@@ -9,7 +9,7 @@ import torch
 import torch.optim
 from opacus import PrivacyEngine
 from pydantic import validate_arguments
-from torch import nn
+from torch import nn,Tensor
 from torch.utils.data import DataLoader, TensorDataset, sampler
 from tqdm import tqdm
 
