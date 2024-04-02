@@ -64,32 +64,34 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         super().__init__()
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
+        self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
         
+        self.event_emb = nn.Embedding(embedding_dim=dim_emb,num_embeddings=2)
 
-        self.event_emb = nn.Embedding(embedding_dim=dim_emb // 2,num_embeddings=2)
 
+    
     def forward(self, inputs: Tensor) -> Tensor:
         time_to_event, event_indicator = inputs[:, 0], inputs[:, 1]
 
         # Sort time-to-event values
-        sorted_indices = torch.argsort(time_to_event)
-        time_to_event = time_to_event[sorted_indices]
+        # sorted_indices = torch.argsort(time_to_event)
+        # time_to_event = time_to_event[sorted_indices]
 
         # Calculate sinusoidal embeddings
-        dim = self.dim_emb // 4
-        max_period = self.max_time_period
-        freqs = torch.exp(-math.log(max_period) / (dim - 1) * torch.arange(dim, dtype=torch.float32, device=time_to_event.device))
-        args = time_to_event[:, None] * freqs[None, :]
-        sinusoidal_emb = torch.cat([torch.sin(args), torch.cos(args)], dim=-1)
+        # dim = self.dim_emb // 4
+        # max_period = self.max_time_period
+        # freqs = torch.exp(-math.log(max_period) / (dim - 1) * torch.arange(dim, dtype=torch.float32, device=time_to_event.device))
+        # args = time_to_event[:, None] * freqs[None, :]
+        # sinusoidal_emb = torch.cat([torch.sin(args), torch.cos(args)], dim=-1)
 
         # Unsort sinusoidal embeddings
-        sinusoidal_emb = sinusoidal_emb[sorted_indices.argsort()]
-
+        # sinusoidal_emb = sinusoidal_emb[sorted_indices.argsort()]
+        emb= self.time_to_event_emb(time_to_event)
         event_emb = self.event_emb(event_indicator.long())
         # print("sin emb size:",sinusoidal_emb.size())
         # print("event emb size:",event_emb.size())
-
-        return torch.cat([sinusoidal_emb, event_emb], dim=-1)
+        emb += event_emb
+        return emb
 
 class DiffusionModel(nn.Module):
     def __init__(
