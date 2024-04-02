@@ -279,7 +279,7 @@ class GAN(nn.Module):
             device=device,
         ).to(self.device)
 
-        self.label_emb = SinusoidalAndEmbeddingLayer()
+        self.label_emb = SinusoidalAndEmbeddingLayer().to(self.device)
 
         # training
         self.generator_n_iter = generator_n_iter
