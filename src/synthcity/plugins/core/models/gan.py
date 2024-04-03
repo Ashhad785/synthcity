@@ -83,7 +83,7 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         event_emb = self.event_emb(event_indicator.long())
         # emb += event_emb
         embed= torch.cat([emb, event_emb], dim=-1)
-        print(embed.size())
+        # print(embed.size())
         return embed
 
 
