@@ -39,7 +39,7 @@ class TimeStepEmbedding(nn.Module):
         - n_layers (int): number of dense layers
         """
         super().__init__()
-        self.dim = dim
+        self.dim = dim//2
         self.max_period = max_period
         self.n_layers = n_layers
 
@@ -59,7 +59,7 @@ class TimeStepEmbedding(nn.Module):
         - timesteps (Tensor): 1D Tensor of N indices, one per batch element.
         """
         d, T = self.dim, self.max_period
-        mid = d // 4
+        mid = d // 2
         fs = torch.exp(-math.log(T) / mid * torch.arange(mid, dtype=torch.float32))
         fs = fs.to(timesteps.device)
         args = timesteps[:, None].float() * fs[None]
