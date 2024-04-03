@@ -72,8 +72,8 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         super().__init__()
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
-        self.time_to_event_emb = TimeStepEmbedding(dim_emb//2, max_time_period)
-        self.event_emb = nn.Embedding(embedding_dim=dim_emb//2,num_embeddings=2)
+        self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
+        self.event_emb = nn.Embedding(embedding_dim=dim_emb,num_embeddings=2)
 
     
     def forward(self, inputs: Tensor) -> Tensor:
@@ -81,10 +81,10 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
 
         emb= self.time_to_event_emb(time_to_event)
         event_emb = self.event_emb(event_indicator.long())
-        # emb += event_emb
-        embed= torch.cat([emb, event_emb], dim=-1)
+        emb += event_emb
+        # embed= torch.cat([emb, event_emb], dim=-1)
         # print(embed.size())
-        return embed
+        return emb
 
 
 class GAN(nn.Module):
