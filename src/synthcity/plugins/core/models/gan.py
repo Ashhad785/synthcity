@@ -186,6 +186,7 @@ class GAN(nn.Module):
         n_units_latent: int,
         n_units_conditional: int = 0,
         embedding_size: int = 128,
+        emb_nonlin: Union[str, nn.Module] = "silu",
         # generator
         generator_n_layers_hidden: int = 2,
         generator_n_units_hidden: int = 250,
@@ -280,7 +281,10 @@ class GAN(nn.Module):
         ).to(self.device)
 
         self.label_emb = SinusoidalAndEmbeddingLayer().to(self.device)
-
+        if isinstance(emb_nonlin, str):
+            self.emb_nonlin = get_nonlin(emb_nonlin)
+        else:
+            self.emb_nonlin = emb_nonlin
         # training
         self.generator_n_iter = generator_n_iter
         self.discriminator_n_iter = discriminator_n_iter
@@ -782,5 +786,5 @@ class GAN(nn.Module):
     ) -> torch.Tensor:
         if cond is None:
             return X
-        emb=self.label_emb(cond)
+        emb=self.emb_nonlin(self.label_emb(cond))
         return torch.cat([X, emb], dim=1)
