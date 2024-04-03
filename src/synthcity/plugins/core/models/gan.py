@@ -64,7 +64,8 @@ class TimeStepEmbedding(nn.Module):
         fs = fs.to(timesteps.device)
         args = timesteps[:, None].float() * fs[None]
         emb = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
-        return self.fc(emb)
+        # return self.fc(emb)
+        return emb
 
 
 class SinusoidalAndEmbeddingLayer(nn.Module):
