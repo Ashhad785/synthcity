@@ -39,7 +39,7 @@ class TimeStepEmbedding(nn.Module):
         - n_layers (int): number of dense layers
         """
         super().__init__()
-        self.dim = dim//2
+        self.dim = dim
         self.max_period = max_period
         self.n_layers = n_layers
 
@@ -72,7 +72,7 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         super().__init__()
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
-        self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
+        self.time_to_event_emb = TimeStepEmbedding(dim_emb//2, max_time_period)
         self.event_emb = nn.Embedding(embedding_dim=dim_emb//2,num_embeddings=2)
 
     
@@ -83,6 +83,7 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         event_emb = self.event_emb(event_indicator.long())
         # emb += event_emb
         embed= torch.cat([emb, event_emb], dim=-1)
+        print(embed.size())
         return embed
 
 
