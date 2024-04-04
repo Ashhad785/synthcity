@@ -28,7 +28,7 @@ class TimeStepEmbedding(nn.Module):
         dim: int,
         max_period: int = 10000,
         n_layers: int = 2,
-        nonlin: Union[str, nn.Module] = "sigmoid",
+        nonlin: Union[str, nn.Module] = "silu",
     ) -> None:
         """
         Create sinusoidal timestep embeddings.
@@ -189,7 +189,7 @@ class GAN(nn.Module):
         n_units_latent: int,
         n_units_conditional: int = 0,
         embedding_size: int = 128,
-        emb_nonlin: Union[str, nn.Module] = "silu",
+        emb_nonlin: Union[str, nn.Module] = "sigmoid",
         # generator
         generator_n_layers_hidden: int = 2,
         generator_n_units_hidden: int = 250,
