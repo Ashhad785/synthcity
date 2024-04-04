@@ -73,8 +73,8 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         super().__init__()
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
-        self.time_to_event_emb = TimeStepEmbedding(dim_emb//4, max_time_period)
-        self.event_emb = nn.Embedding(embedding_dim=dim_emb//4,num_embeddings=2)
+        self.time_to_event_emb = TimeStepEmbedding(dim_emb//2, max_time_period)
+        self.event_emb = nn.Embedding(embedding_dim=dim_emb//2,num_embeddings=2)
 
     
     def forward(self, inputs: Tensor) -> Tensor:
@@ -252,7 +252,7 @@ class GAN(nn.Module):
 
         self.generator = MLP(
             task_type="regression",
-            n_units_in=n_units_latent + embedding_size//4,
+            n_units_in=n_units_latent + embedding_size//2,
             n_units_out=n_features,
             n_layers_hidden=generator_n_layers_hidden,
             n_units_hidden=generator_n_units_hidden,
@@ -269,7 +269,7 @@ class GAN(nn.Module):
 
         self.discriminator = MLP(
             task_type="regression",
-            n_units_in=n_features + embedding_size//4,
+            n_units_in=n_features + embedding_size//2,
             n_units_out=1,
             n_layers_hidden=discriminator_n_layers_hidden,
             n_units_hidden=discriminator_n_units_hidden,
