@@ -28,7 +28,7 @@ class TimeStepEmbedding(nn.Module):
         dim: int,
         max_period: int = 10000,
         n_layers: int = 2,
-        nonlin: Union[str, nn.Module] = "silu",
+        nonlin: Union[str, nn.Module] = "sigmoid",
     ) -> None:
         """
         Create sinusoidal timestep embeddings.
@@ -789,5 +789,5 @@ class GAN(nn.Module):
     ) -> torch.Tensor:
         if cond is None:
             return X
-        emb=self.label_emb(cond)
+        emb=self.emb_nonlin(self.label_emb(cond))
         return torch.cat([X, emb], dim=1)
