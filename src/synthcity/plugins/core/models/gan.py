@@ -82,10 +82,10 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
 
         emb= self.time_to_event_emb(time_to_event)
         event_emb = self.event_emb(event_indicator.long())
-        # emb += event_emb
-        embed= torch.cat([emb, event_emb], dim=-1)
+        emb += event_emb
+        # embed= torch.cat([emb, event_emb], dim=-1)
         # print(embed.size())
-        return embed
+        return emb
 
 
 class GAN(nn.Module):
@@ -252,7 +252,7 @@ class GAN(nn.Module):
 
         self.generator = MLP(
             task_type="regression",
-            n_units_in=n_units_latent + embedding_size//2,
+            n_units_in=n_units_latent + embedding_size//4,
             n_units_out=n_features,
             n_layers_hidden=generator_n_layers_hidden,
             n_units_hidden=generator_n_units_hidden,
@@ -269,7 +269,7 @@ class GAN(nn.Module):
 
         self.discriminator = MLP(
             task_type="regression",
-            n_units_in=n_features + embedding_size//2,
+            n_units_in=n_features + embedding_size//4,
             n_units_out=1,
             n_layers_hidden=discriminator_n_layers_hidden,
             n_units_hidden=discriminator_n_units_hidden,
