@@ -789,5 +789,5 @@ class GAN(nn.Module):
     ) -> torch.Tensor:
         if cond is None:
             return X
-        emb=self.emb_nonlin(self.label_emb(cond))
+        emb=self.label_emb(cond)
         return torch.cat([X, emb], dim=1)
