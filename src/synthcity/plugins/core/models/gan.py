@@ -69,11 +69,11 @@ class TimeStepEmbedding(nn.Module):
 
 
 class SinusoidalAndEmbeddingLayer(nn.Module):
-    def __init__(self, dim_emb: int=128, max_time_period: int=10000):
+    def __init__(self, dim_emb: int=4, max_time_period: int=10000):
         super().__init__()
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
-        self.time_to_event_emb = TimeStepEmbedding(dim_emb//2, max_time_period)
+        self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
         self.event_emb = nn.Embedding(embedding_dim=dim_emb//2,num_embeddings=2)
 
     
