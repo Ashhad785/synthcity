@@ -74,7 +74,7 @@ class SinusoidalAndEmbeddingLayer(nn.Module):
         self.dim_emb = dim_emb
         self.max_time_period = max_time_period
         self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
-        self.event_emb = nn.Embedding(embedding_dim=dim_emb//2,num_embeddings=2)
+        self.event_emb = nn.Embedding(embedding_dim=dim_emb,num_embeddings=2)
 
     
     def forward(self, inputs: Tensor) -> Tensor:
@@ -188,7 +188,7 @@ class GAN(nn.Module):
         n_features: int,
         n_units_latent: int,
         n_units_conditional: int = 0,
-        embedding_size: int = 6,
+        embedding_size: int = 8,
         emb_nonlin: Union[str, nn.Module] = "sigmoid",
         # generator
         generator_n_layers_hidden: int = 2,
