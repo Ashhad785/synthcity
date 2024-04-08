@@ -188,7 +188,7 @@ class GAN(nn.Module):
         n_features: int,
         n_units_latent: int,
         n_units_conditional: int = 0,
-        embedding_size: int = 128,
+        embedding_size: int = 6,
         emb_nonlin: Union[str, nn.Module] = "sigmoid",
         # generator
         generator_n_layers_hidden: int = 2,
