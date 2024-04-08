@@ -22,70 +22,70 @@ from synthcity.plugins.core.models.factory import get_nonlin
 # synthcity relative
 from .mlp import MLP
 
-class TimeStepEmbedding(nn.Module):
-    def __init__(
-        self,
-        dim: int,
-        max_period: int = 10000,
-        n_layers: int = 2,
-        nonlin: Union[str, nn.Module] = "silu",
-    ) -> None:
-        """
-        Create sinusoidal timestep embeddings.
+# class TimeStepEmbedding(nn.Module):
+#     def __init__(
+#         self,
+#         dim: int,
+#         max_period: int = 10000,
+#         n_layers: int = 2,
+#         nonlin: Union[str, nn.Module] = "silu",
+#     ) -> None:
+#         """
+#         Create sinusoidal timestep embeddings.
 
-        Args:
-        - dim (int): the dimension of the output.
-        - max_period (int): controls the minimum frequency of the embeddings.
-        - n_layers (int): number of dense layers
-        """
-        super().__init__()
-        self.dim = dim
-        self.max_period = max_period
-        self.n_layers = n_layers
+#         Args:
+#         - dim (int): the dimension of the output.
+#         - max_period (int): controls the minimum frequency of the embeddings.
+#         - n_layers (int): number of dense layers
+#         """
+#         super().__init__()
+#         self.dim = dim
+#         self.max_period = max_period
+#         self.n_layers = n_layers
 
-        if dim % 2 != 0:
-            raise ValueError(f"embedding dim must be even, got {dim}")
+#         if dim % 2 != 0:
+#             raise ValueError(f"embedding dim must be even, got {dim}")
 
-        layers = []
-        for _ in range(n_layers - 1):
-            layers.append(nn.Linear(dim, dim))
-            layers.append(get_nonlin(nonlin))
+#         layers = []
+#         for _ in range(n_layers - 1):
+#             layers.append(nn.Linear(dim, dim))
+#             layers.append(get_nonlin(nonlin))
 
-        self.fc = nn.Sequential(*layers, nn.Linear(dim, dim))
+#         self.fc = nn.Sequential(*layers, nn.Linear(dim, dim))
 
-    def forward(self, timesteps: Tensor) -> Tensor:
-        """
-        Args:
-        - timesteps (Tensor): 1D Tensor of N indices, one per batch element.
-        """
-        d, T = self.dim, self.max_period
-        mid = d // 2
-        fs = torch.exp(-math.log(T) / mid * torch.arange(mid, dtype=torch.float32))
-        fs = fs.to(timesteps.device)
-        args = timesteps[:, None].float() * fs[None]
-        emb = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
-        return self.fc(emb)
+#     def forward(self, timesteps: Tensor) -> Tensor:
+#         """
+#         Args:
+#         - timesteps (Tensor): 1D Tensor of N indices, one per batch element.
+#         """
+#         d, T = self.dim, self.max_period
+#         mid = d // 2
+#         fs = torch.exp(-math.log(T) / mid * torch.arange(mid, dtype=torch.float32))
+#         fs = fs.to(timesteps.device)
+#         args = timesteps[:, None].float() * fs[None]
+#         emb = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
+#         return self.fc(emb)
         # return emb
 
 
-class SinusoidalAndEmbeddingLayer(nn.Module):
-    def __init__(self, dim_emb: int=4, max_time_period: int=10000):
-        super().__init__()
-        self.dim_emb = dim_emb
-        self.max_time_period = max_time_period
-        self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
-        self.event_emb = nn.Embedding(embedding_dim=dim_emb,num_embeddings=2)
+# class SinusoidalAndEmbeddingLayer(nn.Module):
+#     def __init__(self, dim_emb: int=4, max_time_period: int=10000):
+#         super().__init__()
+#         self.dim_emb = dim_emb
+#         self.max_time_period = max_time_period
+#         self.time_to_event_emb = TimeStepEmbedding(dim_emb, max_time_period)
+#         self.event_emb = nn.Embedding(embedding_dim=dim_emb,num_embeddings=2)
 
     
-    def forward(self, inputs: Tensor) -> Tensor:
-        time_to_event, event_indicator = inputs[:, 0], inputs[:, 1]
+#     def forward(self, inputs: Tensor) -> Tensor:
+#         time_to_event, event_indicator = inputs[:, 0], inputs[:, 1]
 
-        emb= self.time_to_event_emb(time_to_event)
-        event_emb = self.event_emb(event_indicator.long())
-        # emb += event_emb
-        embed= torch.cat([emb, event_emb], dim=-1)
-        # print(embed.size())
-        return embed
+#         emb= self.time_to_event_emb(time_to_event)
+#         event_emb = self.event_emb(event_indicator.long())
+#         # emb += event_emb
+#         embed= torch.cat([emb, event_emb], dim=-1)
+#         # print(embed.size())
+#         return embed
 
 
 class GAN(nn.Module):
@@ -188,8 +188,8 @@ class GAN(nn.Module):
         n_features: int,
         n_units_latent: int,
         n_units_conditional: int = 0,
-        embedding_size: int = 8,
-        emb_nonlin: Union[str, nn.Module] = "sigmoid",
+        # embedding_size: int = 8,
+        # emb_nonlin: Union[str, nn.Module] = "sigmoid",
         # generator
         generator_n_layers_hidden: int = 2,
         generator_n_units_hidden: int = 250,
@@ -252,7 +252,8 @@ class GAN(nn.Module):
 
         self.generator = MLP(
             task_type="regression",
-            n_units_in=n_units_latent + embedding_size,
+            # n_units_in=n_units_latent + embedding_size,
+            n_units_in=n_units_latent + n_units_conditional,
             n_units_out=n_features,
             n_layers_hidden=generator_n_layers_hidden,
             n_units_hidden=generator_n_units_hidden,
@@ -269,7 +270,8 @@ class GAN(nn.Module):
 
         self.discriminator = MLP(
             task_type="regression",
-            n_units_in=n_features + embedding_size,
+            # n_units_in=n_features + embedding_size,
+            n_units_in=n_features + n_units_conditional,
             n_units_out=1,
             n_layers_hidden=discriminator_n_layers_hidden,
             n_units_hidden=discriminator_n_units_hidden,
@@ -283,11 +285,11 @@ class GAN(nn.Module):
             device=device,
         ).to(self.device)
 
-        self.label_emb = SinusoidalAndEmbeddingLayer().to(self.device)
-        if isinstance(emb_nonlin, str):
-            self.emb_nonlin = get_nonlin(emb_nonlin)
-        else:
-            self.emb_nonlin = emb_nonlin
+        # self.label_emb = SinusoidalAndEmbeddingLayer().to(self.device)
+        # if isinstance(emb_nonlin, str):
+        #     self.emb_nonlin = get_nonlin(emb_nonlin)
+        # else:
+        #     self.emb_nonlin = emb_nonlin
         # training
         self.generator_n_iter = generator_n_iter
         self.discriminator_n_iter = discriminator_n_iter
@@ -789,5 +791,6 @@ class GAN(nn.Module):
     ) -> torch.Tensor:
         if cond is None:
             return X
-        emb=self.label_emb(cond)
-        return torch.cat([X, emb], dim=1)
+        # emb=self.label_emb(cond)
+        # return torch.cat([X, emb], dim=1)
+        return torch.cat([X, cond], dim=1)
