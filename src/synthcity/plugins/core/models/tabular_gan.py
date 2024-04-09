@@ -191,9 +191,9 @@ class TabularGAN(torch.nn.Module):
             if len(cond.shape) == 1:
                 cond = cond.reshape(-1, 1)
 
-            self.cond_encoder = OneHotEncoder(handle_unknown="ignore").fit(cond)
-            cond = self.cond_encoder.transform(cond).toarray()
-            # cond = cond
+            # self.cond_encoder = OneHotEncoder(handle_unknown="ignore").fit(cond)
+            # cond = self.cond_encoder.transform(cond).toarray()
+            cond = cond
 
             n_units_conditional = cond.shape[-1]
 
@@ -344,8 +344,8 @@ class TabularGAN(torch.nn.Module):
             if len(cond.shape) == 1:
                 cond = cond.reshape(-1, 1)
 
-            cond = self.cond_encoder.transform(cond).toarray()
-            # cond = cond
+            # cond = self.cond_encoder.transform(cond).toarray()
+            cond = cond
 
         if not self.predefined_conditional and self.dataloader_sampler is not None:
             cond = self.dataloader_sampler.get_dataset_conditionals()
@@ -400,8 +400,8 @@ class TabularGAN(torch.nn.Module):
             if len(cond.shape) == 1:
                 cond = cond.reshape(-1, 1)
 
-            cond = self.cond_encoder.transform(cond).toarray()
-            # cond=cond
+            # cond = self.cond_encoder.transform(cond).toarray()
+            cond=cond
 
         if not self.predefined_conditional and self.dataloader_sampler is not None:
             cond = self.dataloader_sampler.sample_conditional(count, p=self.sample_prob)
