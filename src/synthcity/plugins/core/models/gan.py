@@ -420,16 +420,16 @@ class GAN(nn.Module):
         self.generator.optimizer.zero_grad()
 
         real_X_raw = X.to(self.device)
-        print("shape of real data: ",real_X_raw.size())
+        # print("shape of real data: ",real_X_raw.size())
         real_X = self._append_optional_cond(real_X_raw, cond)
         batch_size = len(real_X)
         
 
         noise = torch.randn(batch_size, self.n_units_latent, device=self.device)
         noise = self._append_optional_cond(noise, cond)
-        print(cond)
-        print("shape of cond: ",cond.size())
-        print("shape of noise+cond: ",noise.size())
+        # print(cond)
+        # print("shape of cond: ",cond.size())
+        # print("shape of noise+cond: ",noise.size())
         fake_raw = self.generator(noise)
         fake = self._append_optional_cond(fake_raw, cond)
 
