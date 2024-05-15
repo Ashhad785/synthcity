@@ -425,6 +425,7 @@ class GAN(nn.Module):
 
         noise = torch.randn(batch_size, self.n_units_latent, device=self.device)
         noise = self._append_optional_cond(noise, cond)
+        print(noise)
 
         fake_raw = self.generator(noise)
         fake = self._append_optional_cond(fake_raw, cond)
