@@ -5,8 +5,8 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from lifelines import KaplanMeierFitter
-# from scipy.integrate import trapz
-from scipy.integrate import trapezoid
+from scipy.integrate import trapz
+# from scipy.integrate import trapezoid
 
 from xgbse.non_parametric import _get_conditional_probs_from_survival
 
@@ -137,8 +137,8 @@ def nonparametric_distance(
         abs_opt.append(abs(syn_local_pred - real_local_pred))
         opt.append(syn_local_pred - real_local_pred)
 
-    auc_abs_opt = trapezoid(abs_opt, time_points) / Tmax
-    auc_opt = trapezoid(opt, time_points) / Tmax
+    auc_abs_opt = trapz(abs_opt, time_points) / Tmax
+    auc_opt = trapz(opt, time_points) / Tmax
     sightedness = (real_T.max() - syn_T.max()) / Tmax
 
     return auc_opt, auc_abs_opt, sightedness
